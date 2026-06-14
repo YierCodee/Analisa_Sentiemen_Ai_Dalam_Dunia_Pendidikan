@@ -13,7 +13,7 @@ from dateutil import parser
 import seaborn as sns
 import matplotlib.pyplot as plt
 import warnings
-api_key = "AIzaSyCT4cI9wgxWRmGoVV2mqN8dqYIOwiq1UFU"
+api_key = ""
 
 # Penghubung API YouTube 
 def get_youtube_client():
