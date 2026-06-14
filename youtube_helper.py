@@ -13,7 +13,7 @@ from dateutil import parser
 import seaborn as sns
 import matplotlib.pyplot as plt
 import warnings
-api_key = "TARUH API DISINI KEY"
+api_key = "AIzaSyCT4cI9wgxWRmGoVV2mqN8dqYIOwiq1UFU"
 
 # Penghubung API YouTube 
 def get_youtube_client():
@@ -39,18 +39,36 @@ def get_channel(idChannel = "UCNJ1Ymd5yFuUPtn21xtRbbw"): #-> Channel ID defaultn
 def get_video_ids(playlistID,   target_count = 50):
             video_ids = []
             os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-            api_service_name = "youtube"
-            api_version = "v3"
+            next_page_token = None
+            #api_service_name = "youtube"
+            #api_version = "v3"
             #get credentials and create an API client
             youtube =  get_youtube_client()
-            request = youtube.playlistItems().list(
-            part="snippet",
-            playlistId=playlistID,
-            maxResults=50
-            )
-            response = request.execute()
-            for item in response['items']: 
-                video_ids.append(item['snippet']['resourceId']['videoId'])
+            print(f"-> Mulai mengunduh daftar video... Target: {target_count}")
+            while len(video_ids) < target_count:
+                try:
+                    request = youtube.playlistItems().list(
+                    part="snippet",
+                    playlistId=playlistID,
+                    maxResults=50,
+                    pageToken=next_page_token
+                    )
+                    response = request.execute()
+                    for item in response['items']: 
+                        video_ids.append(item['snippet']['resourceId']['videoId'])
+                        if len(video_ids) >= target_count:
+                         break
+                    #Halaman Selanjutnya
+                    print(f"   [Proses] Berhasil menghimpun {len(video_ids)} Video ID...")
+
+                    #update page 
+                    next_page_token = response.get('nextPageToken')
+                    if not next_page_token:
+                        print("   [Info] Semua video yang tersedia di channel ini sudah berhasil ditarik.")
+                        break
+                except Exception as e:
+                    print(f"❌ Terjadi kendala saat menarik halaman daftar video: {e}")
+                break
             return video_ids
 
 def get_video_ids2(playlistID = ""):
@@ -75,7 +93,7 @@ def get_video_details(video_ids):
     """Fungsi 3: Mengambil Statistik Detail dengan Cara yang Lebih Aman"""
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
     youtube = get_youtube_client()
-    
+
     # Menggabungkan list ID menjadi string panjang dipisah koma
     id_string = ",".join(video_ids)
     
@@ -84,7 +102,6 @@ def get_video_details(video_ids):
         id=id_string
     )
     response = request.execute()
-    
     all_video_info = []
     
     # Ekstrak langsung secara manual tanpa loop bertingkat agar aman
@@ -110,7 +127,6 @@ def get_video_comments(video_id, target_count = 100):
     youtube = get_youtube_client()
     komentar_list = []
     next_page_token = None
-    
     try: 
           while len(komentar_list) < target_count:
                 sisa_ambil = target_count - len(komentar_list)
@@ -121,7 +137,6 @@ def get_video_comments(video_id, target_count = 100):
                     maxResults=max_results,
                     pageToken=next_page_token
                 )
-
                 response = request.execute()
                 for item in response.get("items", []):
                       top_comment = item["snippet"]["topLevelComment"]["snippet"]
@@ -133,10 +148,15 @@ def get_video_comments(video_id, target_count = 100):
                             "likeCount": top_comment.get("likeCount", 0),
                             "publishedAt": top_comment.get("publishedAt")
                       })
+                      if len(komentar_list) >= target_count:
+                         break
+                print(f"   [Proses] Berhasil mengunduh {len(komentar_list)} komentar...")
                 next_page_token = response.get("nextPageToken")
                 if not next_page_token:
+                      print("   [Info] Semua komentar yang tersedia di video ini sudah diambil.")
                       break  # Tidak ada halaman berikutnya, keluar dari loop
     except googleapiclient.errors.HttpError as e:
           print(f"Terjadi error saat mengambil komentar: {e}")
 
+    print(f"🎉 Selesai! Total komentar yang berhasil dihimpun: {len(komentar_list)}")
     return komentar_list

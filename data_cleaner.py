@@ -13,14 +13,14 @@ vectorizer_komentar = None
 model_komentar = None
 
 print("=" * 60)
-print(">>> MENYIAPKAN MESIN MACHINE LEARNING LOKHasty GeneralizationAL... <<<")
+print(">>> MENYIAPKAN MODEL MACHINE LEARNING <<<")
 print("=" * 60)
 
 # ---------------------------------------------------------------------
 # 1. SETUP CLASSIFIER UNTUK JUDUL VIDEO (PENDIDIKAN vs BUKAN)
 # ---------------------------------------------------------------------
 try:
-    print("\n>>> Membaca dataset judul video dari CSV...")
+    print("\n>>> 💻 Membaca dataset judul video dari CSV...")
     df_video = pd.read_csv("dataset_judul_video_500.csv")
     df_video = df_video.dropna(subset=['title', 'label'])
     
@@ -28,7 +28,7 @@ try:
     X_video_train = vectorizer_video.fit_transform(df_video['title'])
     model_video = MultinomialNB()
     model_video.fit(X_video_train, df_video['label'])
-    print(f"   [SUKSES] Otak klasifikasi video siap dengan {len(df_video)} data!")
+    print(f"   [SUKSES] Model klasifikasi video siap dengan {len(df_video)} data!")
 except Exception as e:
     print(f"   [🚨 GAGAL INITIAL] Gagal melatih model video: {e}")
     print("   [INFO] Pastikan file 'dataset_video_keggle.csv' ada di folder dan memiliki kolom 'title' dan 'label'.")
@@ -37,7 +37,7 @@ except Exception as e:
 # 2. SETUP CLASSIFIER UNTUK LOGICAL FALLACY KOMENTAR
 # ---------------------------------------------------------------------
 try:
-    print("\n>>> Membaca dataset logical fallacy dari CSV...")
+    print("\n>>> 💻 Membaca dataset logical fallacy dari CSV...")
     df_fallacy = pd.read_csv("dataset_logical_fallacy_500.csv")
     df_fallacy = df_fallacy.dropna(subset=['title', 'label'])
     
@@ -45,7 +45,7 @@ try:
     X_komentar_train = vectorizer_komentar.fit_transform(df_fallacy['title'])
     model_komentar = MultinomialNB()
     model_komentar.fit(X_komentar_train, df_fallacy['label'])
-    print(f"   [SUKSES] Otak klasifikasi fallacy siap dengan {len(df_fallacy)} data!")
+    print(f"   [SUKSES] Model klasifikasi fallacy siap dengan {len(df_fallacy)} data!")
 except Exception as e:
     print(f"   [🚨 GAGAL INITIAL] Gagal melatih model komentar: {e}")
     print("   [INFO] Pastikan file 'dataset_fallacy_keggle.csv' ada di folder dan memiliki kolom 'title' and 'label'.")
